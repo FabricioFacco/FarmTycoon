@@ -35,17 +35,24 @@ class FarmGame:
         print("8. Sair")
 
     def plant_seed(self):
-        if self.seeds > 0 and self.available_areas > 0:
-            area_id = max(self.occupied_areas) + 1 if self.occupied_areas else 1
-            self.occupied_areas.append(area_id)
-            self.available_areas -= 1
-            self.seeds -= 1
-            self.plants[area_id] = {'stage': 'Nascendo', 'time_planted': time.time()}
-            print(f"[!] Semente plantada na Área {area_id}")
-        elif self.seeds == 0:
-            print("[!] Não há sementes disponíveis.")
-        elif self.available_areas == 0:
-            print("[!] Não há áreas disponíveis para plantio.")
+        try:
+            num_seeds = int(input("[>] Quantidade de sementes a plantar: "))
+            if num_seeds <= 0:
+                print("[!] Por favor, insira um número positivo de sementes.")
+                return
+
+            if num_seeds <= self.seeds and num_seeds <= self.available_areas:
+                for _ in range(num_seeds):
+                    area_id = max(self.occupied_areas) + 1 if self.occupied_areas else 1
+                    self.occupied_areas.append(area_id)
+                    self.available_areas -= 1
+                    self.seeds -= 1
+                    self.plants[area_id] = {'stage': 'Nascendo', 'time_planted': time.time()}
+                    print(f"[!] Semente plantada na Área {area_id}")
+            else:
+                print("[!] Quantidade de sementes ou áreas disponíveis insuficientes.")
+        except ValueError:
+            print("[!] Por favor, insira um número válido.")
         time.sleep(3)
 
     def harvest_all_crops(self):
@@ -53,14 +60,17 @@ class FarmGame:
         for area_id, plant in self.plants.items():
             if plant['stage'] == 'Pronto para Colheita':
                 harvested_areas.append(area_id)
-                self.grains += area_id * 5  # Valor arbitrário de grãos por área
+                self.grains += area_id * 5  # Corrigido: adicione grãos com base no area_id
 
         for area_id in harvested_areas:
             del self.plants[area_id]
             self.occupied_areas.remove(area_id)
             self.available_areas += 1
 
-        if not harvested_areas:
+        if harvested_areas:
+            print(f"[!] Você colheu grãos das áreas: {harvested_areas}")
+            print(f"[!] Você conseguiu {sum(area_id * 5 for area_id in harvested_areas)} grãos.")
+        else:
             print("[!] Nenhuma planta pronta para colheita.")
         time.sleep(3)
 
@@ -69,7 +79,7 @@ class FarmGame:
             money_earned = self.grains * 2  # Valor arbitrário de venda de grãos
             self.money += money_earned
             self.grains = 0
-            print(f"[!] Você vendeu {self.grains} grãos por ${money_earned}.")
+            print(f"[!] Você vendeu todos seus grãos por ${money_earned}.")
         else:
             print("[!] Não há grãos para vender.")
         time.sleep(3)
@@ -100,7 +110,7 @@ class FarmGame:
             time_elapsed = current_time - plant['time_planted']
             if time_elapsed >= 30:
                 stages = ['Nascendo', 'Criando Grãos', 'Secando', 'Pronto para Colheita']
-                current_stage_index = int(time_elapsed // 30)
+                current_stage_index = min(int(time_elapsed // 30), len(stages) - 1)  # Corrigido: limitado ao último índice de estágio
                 plant['stage'] = stages[current_stage_index]
 
     def save_game(self, filename='savegame.json'):
@@ -132,6 +142,10 @@ class FarmGame:
         except json.JSONDecodeError:
             print("[!] Erro ao decodificar o arquivo de savegame.")
 
+    def confirm_action(self, action):
+        user_input = input(f"[?] Tem certeza que deseja {action}? (Digite 's' para sim, 'n' para não): ").lower()
+        return user_input == 's'
+
     def game_loop(self):
         while True:
             self.update_plants()
@@ -149,12 +163,15 @@ class FarmGame:
             elif choice == '5':
                 self.sell_grains()
             elif choice == '6':
-                self.save_game()
+                if self.confirm_action('salvar o jogo (Irá substir o progresso atual)'):
+                    self.save_game()
             elif choice == '7':
-                self.load_game()
+                if self.confirm_action('carregar o jogo (Pode perder o progresso atual)'):
+                    self.load_game()
             elif choice == '8':
-                print("Obrigado por jogar! Até mais.")
-                break
+                if self.confirm_action('sair do jogo (Pode perder todo o progresso não salvo)'):
+                    print("Obrigado por jogar! Até mais.")
+                    break
             else:
                 print("[!] Opção inválida. Tente novamente.")
             time.sleep(3)
