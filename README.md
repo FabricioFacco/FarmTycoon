@@ -9,7 +9,7 @@ O Farm Game permite que os jogadores cultivem e gerenciem sua própria fazenda. 
 ## Funcionalidades 🌱
 
 - **Plantar Sementes**: Os jogadores podem plantar sementes nas áreas disponíveis.
-- **Colher Plantas Prontas**: Após um determinado tempo de crescimento, as plantas estão prontas para serem colhidas, e os jogadores podem colher todas de uma vez.
+- **Colher Plantas**: Após um determinado tempo de crescimento, as plantas estão prontas para serem colhidas, e os jogadores podem colher todas de uma vez.
 - **Comprar Sementes e Áreas**: Os jogadores podem gastar dinheiro para comprar mais sementes ou áreas adicionais para plantio.
 - **Vender Grãos**: Os jogadores podem vender os grãos colhidos para ganhar dinheiro.
 
